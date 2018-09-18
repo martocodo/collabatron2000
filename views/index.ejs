@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+
+<head>
+  <title>Collabatron 2000</title>
+  <meta charset="utf-8">
+  <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,500,600,700" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pickr-widget/dist/pickr.min.css" />
+  <script src="socket.io/socket.io.js"></script>
+  <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pickr-widget/dist/pickr.min.js"></script>
+  <script src="./js/drawingController.js"></script>
+  <script src="./js/snapshotController.js"></script>
+  <script src="./js/chatController.js"></script>
+  <script src="https://use.fontawesome.com/c0977d07b4.js"></script>
+  <script>
+    var notifier;
+    new Promise((resolve, reject) => {
+      let tag = document.createElement('script');
+      tag.src = "https://f3oall.github.io/awesome-notifications/dist/index.var.js";
+      tag.async = true;
+      tag.onload = () => {
+        resolve();
+      };
+      let firstScript = document.getElementsByTagName('script')[0]
+      firstScript.parentNode.insertBefore(tag, firstScript);
+    }).then(() => {
+      notifier = new AWN({
+        duration: 2000,
+        position: 'top-right',
+      });
+    })
+  </script>
+</head>
+
+<body>
+  <div id="toolbar">
+    <span id="logo">Collabatron 2000 <i class="fa fa-users"></i></span>
+    <span id="usersOnline"><span id="usersTotal">0</span> users online</span>
+    <div id="tools">
+      <div class="tool">
+        <span class="toolLabel">Choose Colour</span>
+        <div id="colorPicker"></div>
+      </div>
+      <div class="tool">
+        <span class="toolLabel">Choose Pen Size</span>
+        <select id="sizePicker">
+          <option value="2">2</option>
+          <option value="5">5</option>
+          <option value="7">7</option>
+          <option value="10">10</option>
+        </select>
+      </div>
+      <div class="tool">
+        <a href="#" class="btnPrimary" id="btnClearCanvas">Clear Drawing <i class="fa fa-eraser"></i></a>
+      </div>
+      <div class="tool">
+        <a href="#" class="btnPrimary" id="btnSaveSnapshot">Save New Snapshot <i class="fa fa-save"></i></a>
+      </div>
+    </div>
+  </div>
+  <div id="pageWrapper">
+    <div id="sidebar">
+      <div id="chatWrapper">
+        <section id="change_username" class="flowContent">
+          <input id="username" type="text" value="" />
+          <a href="#" class="btnPrimary" id="btnUpdateUsername">Change username <i class="fa fa-user"></i></a>
+        </section>
+
+        <section id="chatroom">
+          <section id="feedback"></section>
+        </section>
+
+
+
+        <section id="messages" class="flowContent">
+          <input id="message" class="vertical-align" type="text" />
+          <a href="#" id="btnSendMessage" class="btnPrimary" type="button">Send <i class="fa fa-chevron-right"></i></a>
+        </section>
+      </div>
+      <div id="snapshotsWrapper">
+        <div id="snapshots"></div>
+      </div>
+    </div>
+    <div id="canvasWrapper">
+      <canvas id="drawing"></canvas>
+    </div>
+  </div>
+  <script type="text/javascript">
+    var canvas, context, socket, drawingController, snapshotController, chatController;
+    var Model = {
+      elements: {
+        chat: {
+          messages: 'chatWrapper',
+          username: 'username',
+        },
+        toolbar: {
+          clear: 'btnClearCanvas',
+          color: 'colorPicker',
+          size: 'sizePicker',
+        }
+      },
+      settings: {
+        color: '#0ED969',
+        size: '2',
+        username: `User${String(Date.now()).slice(-4)}`
+      },
+    }
+    // Wait for Ready
+    $(() => {
+      socket = io.connect();
+      canvas = document.getElementById('drawing');
+      context = canvas.getContext('2d');
+      // Setup controllers
+      drawingController = DrawingController(Model);
+      snapshotController = SnapshotController();
+      chatController = ChatController(Model);
+    });
+  </script>
+</body>
+
+</html>
